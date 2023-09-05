@@ -13,10 +13,13 @@ RUN npm install
 # Copy the rest of the application code into the container
 COPY . .
 
+# Build the TypeScript application
+RUN npm run build
+
 # Set the environment variable to run the app in production mode
 ENV NODE_ENV=production
 
-# Expose port 3000 (or whatever port your Fastify app runs on)
+# Expose port 3000 (or whatever port your app runs on)
 EXPOSE 3000
 
 # Define the command that will run when the container starts

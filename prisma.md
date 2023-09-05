@@ -42,4 +42,31 @@ Here's a general overview of how you would migrate database changes in Prisma:
 8. **Production Migrations**:
    Before applying migrations to your production database, always test them on a staging or backup environment. Once you're sure about your changes, you can run the `npx prisma migrate deploy` command as part of your deployment process to migrate your production database.
 
-Remember to regularly check Prisma's documentation and release notes. Prisma is actively developed, and there could be new features or changes in the migration process.
+## Safe or not
+
+1. **Safe Operations**:
+   - **Additions**: Adding a new table, adding a new column (provided it's nullable or has a default value), or adding a new relation are typically safe operations.
+   - **Renaming**: If you rename a field in the Prisma schema, Prisma Migrate will by default treat this as a deletion of the old column and an addition of a new one. To safely rename a column, you'd use the `@map` directive in the Prisma schema to map the Prisma field to the existing column in the database.
+2. **Potentially Unsafe Operations**:
+
+   - **Deletions**: Removing a table or column will lead to data loss for that table/column.
+   - **Changing Data Type**: Changing the data type of a column, especially if it's not compatible (e.g., from string to integer), can result in data loss or errors.
+   - **Making a Column Non-Nullable**: If you have existing rows with null values in that column, this will cause an error unless you set a default value.
+
+3. **Reviewing Migrations**:
+   Before applying a migration, you should review the generated SQL to understand what will be executed against the database. This is especially important for potentially destructive changes.
+
+4. **Backups**:
+   Always back up your database before applying migrations, especially in a production environment. This ensures that you have a recovery point in case something goes wrong.
+
+5. **Dry Runs & Staging Environments**:
+   Test your migrations in a staging or development environment that mirrors production as closely as possible. This will give you confidence in the migration and alert you to any potential issues.
+
+6. **Customizing Migrations**:
+   If the automatically generated SQL does not handle a particular migration in the way you'd like, you can manually modify the migration's SQL to better suit your needs. This requires a strong understanding of SQL and the specific database you're working with.
+
+7. **Data Migrations**:
+   In cases where you need to transform data (e.g., splitting a column into two), you'd typically do this in two steps:
+   - Create a migration to add the new columns without removing the old one.
+   - Write and execute a script to migrate and transform the data from the old column to the new ones.
+   - Create another migration to remove the old column.

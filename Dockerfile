@@ -14,7 +14,10 @@ RUN npm install
 COPY . .
 
 # Build the TypeScript application
-RUN npm run build
+RUN npm install
+
+# generate the prisma client
+RUN npx prisma generate
 
 # Set the environment variable to run the app in production mode
 ENV NODE_ENV=production

@@ -25,9 +25,9 @@ FROM node:16
 WORKDIR /app
 
 # Copy necessary files from the build stage
-COPY --from=build /app/package*.json ./
-COPY --from=build /app/prisma ./prisma/
-COPY --from=build /app/server.js ./server.js
+COPY --from=build /src/package*.json ./
+COPY --from=build /src/prisma ./prisma/
+COPY --from=build /src/server.js ./server.js
 # If you have other directories or files that need to be present at runtime, copy them similarly
 
 # Install only production dependencies

@@ -2,7 +2,7 @@
 FROM node:16 AS build
 
 # Set working directory
-WORKDIR /app
+WORKDIR /src
 
 # Copy package.json and package-lock.json (if you have one) to install dependencies
 COPY package*.json ./

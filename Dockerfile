@@ -1,29 +1,40 @@
-# Use an official Node.js runtime as the base image
-FROM node:18
+# Stage 1: Building the code
+FROM node:16 AS build
 
-# Set the working directory inside the container
-WORKDIR /src
+# Set working directory
+WORKDIR /app
 
-# Copy package.json and package-lock.json to the container's working directory
+# Copy package.json and package-lock.json (if you have one) to install dependencies
 COPY package*.json ./
 
-# Install the application dependencies inside the container
+# Install dependencies (including devDependencies for building the app)
 RUN npm install
 
-# Copy the rest of the application code into the container
+# Copy the rest of the application code
 COPY . .
 
-# Build the TypeScript application
-RUN npm install
+# Build the TypeScript code
+RUN npm run build
 
-# generate the prisma client
+# Generate Prisma client
 RUN npx prisma generate
 
-# Set the environment variable to run the app in production mode
-ENV NODE_ENV=production
+# Stage 2: Run the built code
+FROM node:16
 
-# Expose port 3000 (or whatever port your app runs on)
+WORKDIR /app
+
+# Copy necessary files from the build stage
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/prisma ./prisma/
+COPY --from=build /app/server.js ./server.js
+# If you have other directories or files that need to be present at runtime, copy them similarly
+
+# Install only production dependencies
+RUN npm install --production
+
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Define the command that will run when the container starts
-CMD [ "npm", "start" ]
+# Command to run the application
+CMD ["node", "server.js"]
